@@ -1,6 +1,8 @@
 def cell_swarm(obs, conf):
     def evaluate_cell(cell):
+        # 1C. OUTWARDS
         """ evaluate qualities of the cell """
+        # REPEAT EACH CELL->UPWARDS->OUTWARDS
         cell = get_patterns(cell)
         cell = calculate_points(cell)
         for i in range(1, conf.rows):
@@ -151,6 +153,7 @@ def cell_swarm(obs, conf):
     swarm_center_vertical = conf.rows // 2
     
     # define swarm as two dimensional array of cells
+    # 0. FOR Convenience, set up data type
     swarm = []
     for column in range(conf.columns):
         swarm.append([])
@@ -167,19 +170,20 @@ def cell_swarm(obs, conf):
             swarm[column].append(cell)
     
     best_cell = None
-    # start searching for best_cell from swarm center
+    # 1A. Start searching for best_cell from swarm center
     x = swarm_center_horizontal
     # shift to right or left from swarm center
     shift = 0
     
     # searching for best_cell
     while x >= 0 and x < conf.columns:
-        # find first empty cell starting from bottom of the column
+        # 1B. find first empty cell starting from bottom of the column
         y = conf.rows - 1
         while y >= 0 and swarm[x][y]["mark"] != 0:
             y -= 1
         # if column is not full
         if y >= 0:
+            # 1C. OUTWARDS 
             # current cell evaluates its own qualities
             current_cell = evaluate_cell(swarm[x][y])
             # current cell compares itself against best cell
