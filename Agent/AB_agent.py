@@ -7,7 +7,16 @@ import numpy as np
 import random
 
 def Minimax_AB(obs, config):
-# Trying with Alpha–beta pruning implementation. N_STEPS = 5 leads to timeout if submited without Alpha–beta pruning. 
+    """
+    In this Minimax-AB algorithm, for EVERY valid moves available
+    we calculate up to N_STEPS search depth summing get_heuristic score
+    which is the sum of each of its recursive nodes. At every step, we keep max
+    of the score (alpha) which is the best move, and prune all moves where beta<alpha,
+    where alpha is the player, beta is the opponent.
+    Depending if you are the player or opponent, the score and alpha/beta is opposite
+     because we go through each child node, which may be either of the players' positions.
+    """
+    # Trying with Alpha–beta pruning implementation. N_STEPS = 5 leads to timeout if submited without Alpha–beta pruning. 
     N_STEPS = 5
     
     # Helper function for score_move: gets board at next step if agent drops piece in selected column
@@ -68,6 +77,7 @@ def Minimax_AB(obs, config):
         valid_moves = [c for c in range(config.columns) if node[0][c] == 0]
         if depth == 0 or is_terminal:
             return get_heuristic(node, mark, config), None
+        # Agent's turn
         if maximizingPlayer:
             value = -np.Inf
             move = None
@@ -97,7 +107,10 @@ def Minimax_AB(obs, config):
 
     
     # Helper function for minimax: calculates value of heuristic for grid
-    def get_heuristic(grid, mark, config):
+    def threat_space_search_heuristics(grid, mark, config):
+        """
+        count_windows(grid, num_discs, piece, config):
+        """
         num_threes = count_windows(grid, 3, mark, config)
         num_fours = count_windows(grid, 4, mark, config)
         num_threes_opp = count_windows(grid, 3, mark%2+1, config)
