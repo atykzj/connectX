@@ -6,19 +6,29 @@
 import numpy as np
 import random
 
-def Minimax_AB(obs, config):
+def Minimax_AB_ScoreM(obs, config):
     """
     In this Minimax-AB algorithm, for EVERY valid moves available
     we calculate up to N_STEPS search depth summing get_heuristic score
     which is the sum of each of its recursive nodes. At every step, we keep max
     of the score (alpha) which is the best move, and prune all moves where beta<alpha,
     where alpha is the player, beta is the opponent.
-    Depending if you are the player or opponent, the score and alpha/beta is opposite
+    Depending if you are the player  or opponent, the score and alpha/beta is opposite
      because we go through each child node, which may be either of the players' positions.
     """
     # Trying with Alpha–beta pruning implementation. N_STEPS = 5 leads to timeout if submited without Alpha–beta pruning. 
-    N_STEPS = 5
+    N_STEPS = 3
     
+    # scoring matrix
+    score_mat = [
+        [3, 4, 5, 7, 5, 4, 3],
+        [4, 6, 8, 10, 8, 6, 4],
+        [5, 8, 11, 13, 11, 8, 5],
+        [5, 8, 11, 13, 11, 8, 5],
+        [4, 6, 8, 10, 8, 6, 4],
+        [3, 4, 5, 7, 5, 4, 3]
+    ]
+
     # Helper function for score_move: gets board at next step if agent drops piece in selected column
     def drop_piece(grid, col, mark, config):
         next_grid = grid.copy()
@@ -152,8 +162,20 @@ def Minimax_AB(obs, config):
     valid_moves = [c for c in range(config.columns) if obs.board[c] == 0]
     # Convert the board to a 2D grid
     grid = np.asarray(obs.board).reshape(config.rows, config.columns)
+
+    # Score Matrix
+    curr_cell_state_rewards = {}
+    for col in valid_moves:
+        curr_cell_state_rewards[col] = 0
+        for row in range(config.rows-1, -1, -1):
+            if grid[row][col] == 0 and curr_cell_state_rewards[col]==0:
+                curr_cell_state_rewards[col] = score_mat[row][col]
+
     # Use the heuristic to assign a score to each possible board in the next step
-    scores = dict(zip(valid_moves, [score_move(grid, col, obs.mark, config, N_STEPS) for col in valid_moves]))
+    # scores = dict(zip(valid_moves, [score_move(grid, col, obs.mark, config, N_STEPS) for col in valid_moves]))
+
+    scores = dict(zip(valid_moves, [score_move(grid, col, obs.mark, config, N_STEPS) + \
+                                    curr_cell_state_rewards[col] for col in valid_moves]))
     # Get a list of columns (moves) that maximize the heuristic
     max_cols = [key for key in scores.keys() if scores[key] == max(scores.values())]
     # Select at random from the maximizing columns
