@@ -148,52 +148,6 @@ def BasicHeuristic2(obs, config):
         score = 0
         return score
         
-        # Add current position matrix score
-        return 138 + positionScoreMatrix
-    
-        start = 0
-        score = 0
-        while start < len(l):
-            if l[start] == piece:
-                end = last_index(l,start)
-                length = end-start+1
-                if length >= 4:
-                    return float('inf')
-                elif length == 3:
-                    if start>0 and end<len(l)-1:
-                        if l[start-1] == 0 and l[end+1] == 0:
-                            return 100000000
-                        if l[start-1] == 0 or l[end+1] == 0:
-                            if playerTurn == piece:
-                                return 100000000
-                            score += 100000
-                    if start == 0:
-                        if l[end+1] == 0:
-                            score += 100000
-                    if end == len(l)-1:
-                        if l[start] == 0:
-                            score += 100000
-                elif length == 2:
-                    if start>1 and l[start-1]==0 and l[start-2] == piece:
-                        score += 100000
-                    elif end<len(l)-2 and l[end+1] == 0  and l[end+2] == piece:
-                        score += 100000
-                    else:
-                        free_spaces = 0
-                        if start>0 and l[start-1] == 0:
-                            free_spaces += 1
-                            if start>1 and l[start-2] == 0:
-                                free_spaces += 1
-                        if end<len(l)-1 and l[end+1] == 0:
-                            free_spaces += 1
-                            if end<len(l)-2 and l[end+2] == 0:
-                                free_spaces += 1
-                        score += min(free_spaces-1,0) * 1000
-                elif length == 1:
-                    score += 10
-                start = end
-            start += 1
-        return score        
 
     # Get list of valid moves
     valid_moves = [c for c in range(config.columns) if obs.board[c] == 0]
