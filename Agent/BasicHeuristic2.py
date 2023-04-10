@@ -126,27 +126,6 @@ def BasicHeuristic2(obs, config):
                     positionScoreMatrix -= score_mat[row][col]
         # Median value of 138
         return 138 + positionScoreMatrix
-    
-    def last_index(l,start):
-        # returns the last consecutive index that has the same value as l[start]
-        end = start+1
-        while end<len(l) and l[end] == l[start]:
-            end += 1
-        return (end-1)
-    
-    def get_score(l, piece, playerTurn):
-        playerTurn = 0
-        positionScoreMatrix = 0
-        for row in range(config.rows):
-            for col in range(config.columns):
-                if grid[row][col] == piece:
-                    positionScoreMatrix += score_mat[row][col]
-                elif grid[row][col] == 2:
-                    playerTurn -= 1
-                    positionScoreMatrix -= score_mat[row][col]
-        playerTurn += 1
-        score = 0
-        return score
         
 
     # Get list of valid moves
