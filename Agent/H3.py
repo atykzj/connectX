@@ -21,12 +21,12 @@ def H3(obs, config):
     
     # scoring matrix
     score_mat = [
-        [3, 4, 5, 7, 5, 4, 3],
-        [4, 6, 8, 10, 8, 6, 4],
+        [3, 4, 5,  7,  5,  4, 3],
+        [4, 6, 8,  10, 8,  6, 4],
         [5, 8, 11, 13, 11, 8, 5],
         [5, 8, 11, 13, 11, 8, 5],
-        [4, 6, 8, 10, 8, 6, 4],
-        [3, 4, 5, 7, 5, 4, 3]
+        [4, 6, 8,  10, 8,  6, 4],
+        [3, 4, 5,  7,  5,  4, 3]
     ]
     # Helper function for score_move: gets board at next step if agent drops piece in selected column
     def drop_piece(grid, col, mark, config):
@@ -41,8 +41,15 @@ def H3(obs, config):
     def score_move(grid, col, mark, config, nsteps):
         next_grid = drop_piece(grid, col, mark, config)
         alpha, beta = -float('inf'), float('inf')
-        score = minimax(next_grid, nsteps-1, False, mark, alpha, beta, config)
-        return score
+        score, _ = minimax(next_grid, nsteps-1, False, mark, alpha, beta, config)
+        positionScoreMatrix = 138
+        for row in range(config.rows):
+            for col in range(config.columns):
+                if grid[row][col] == 1 and score_mat[row][col]:
+                    positionScoreMatrix += score_mat[row][col]
+                elif grid[row][col] == 2 and score_mat[row][col]:
+                    positionScoreMatrix -= score_mat[row][col]
+        return score * (1 + (positionScoreMatrix/138)) if score < 10000000 else score
 
     # Helper function for minimax: checks if agent or opponent has four in a row in the window
     def is_terminal_window(window, config):
@@ -118,15 +125,12 @@ def H3(obs, config):
     # Helper function for minimax: calculates value of heuristic for grid
     def get_heuristic(grid, mark, config):
         playerTurn = 0
-        positionScoreMatrix = 0
         for row in range(config.rows):
             for col in range(config.columns):
                 if grid[row][col] == 1:
                     playerTurn += 1
-                    positionScoreMatrix += score_mat[row][col]
                 elif grid[row][col] == 2:
                     playerTurn -= 1
-                    positionScoreMatrix -= score_mat[row][col]
         playerTurn += 1
         score = 0
         
@@ -182,10 +186,9 @@ def H3(obs, config):
                 j += 1
             score += get_score(diagonal, mark, playerTurn)
             score -= get_score(diagonal, mark%2+1, playerTurn)
-        positionScoreMatrix = positionScoreMatrix/138
-        positionScoreMatrix = positionScoreMatrix + 1
-        score = score * positionScoreMatrix 
-        return int(score)
+        # positionScoreMatrix = positionScoreMatrix / 138
+        # return score if score >= 10000000 else int(score * positionScoreMatrix)
+        return score
     
     def last_index(l,start):
         # returns the last consecutive index that has the same value as l[start]
@@ -206,22 +209,22 @@ def H3(obs, config):
                 elif length == 3:
                     if start>0 and end<len(l)-1:
                         if l[start-1] == 0 and l[end+1] == 0:
-                            return 100000000
+                            return 10000000
                         if l[start-1] == 0 or l[end+1] == 0:
                             if playerTurn == piece:
-                                return 100000000
-                            score += 100000
+                                return 10000000
+                            score += 10000
                     if start == 0:
                         if l[end+1] == 0:
-                            score += 100000
+                            score += 10000
                     if end == len(l)-1:
                         if l[start] == 0:
-                            score += 100000
+                            score += 10000
                 elif length == 2:
                     if start>1 and l[start-1]==0 and l[start-2] == piece:
-                        score += 100000
+                        score += 10000
                     elif end<len(l)-2 and l[end+1] == 0  and l[end+2] == piece:
-                        score += 100000
+                        score += 10000
                     else:
                         free_spaces = 0
                         if start>0 and l[start-1] == 0:
@@ -232,9 +235,9 @@ def H3(obs, config):
                             free_spaces += 1
                             if end<len(l)-2 and l[end+2] == 0:
                                 free_spaces += 1
-                        score += min(free_spaces-1,0) * 1000
+                        score += min(free_spaces-1,0) * 100
                 elif length == 1:
-                    score += 10
+                    score += 1
                 start = end
             start += 1
         return score        
@@ -247,5 +250,8 @@ def H3(obs, config):
     scores = dict(zip(valid_moves, [score_move(grid, col, obs.mark, config, N_STEPS) for col in valid_moves]))
     # Get a list of columns (moves) that maximize the heuristic
     max_cols = [key for key in scores.keys() if scores[key] == max(scores.values())]
-    # Select at random from the maximizing columns
-    return random.choice(max_cols)
+    # Select from the maximizing columns
+    for mc in max_cols:
+        if mc in valid_moves:
+            return mc
+    return random.choice(valid_moves)
